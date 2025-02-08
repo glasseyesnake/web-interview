@@ -7,37 +7,91 @@ import {
   ListItemText,
   ListItemIcon,
   Typography,
+  Snackbar,
+  Alert,
 } from '@mui/material'
 import ReceiptIcon from '@mui/icons-material/Receipt'
 import { TodoListForm } from './TodoListForm'
-
-// Simulate network
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
-
-const fetchTodoLists = () => {
-  return sleep(1000).then(() =>
-    Promise.resolve({
-      '0000000001': {
-        id: '0000000001',
-        title: 'First List',
-        todos: ['First todo of first list!'],
-      },
-      '0000000002': {
-        id: '0000000002',
-        title: 'Second List',
-        todos: ['First todo of second list!'],
-      },
-    })
-  )
-}
+import { fetchTodoLists, addTodo, deleteTodo, saveTodoList } from '../../api/todos-server-calls'
 
 export const TodoLists = ({ style }) => {
   const [todoLists, setTodoLists] = useState({})
   const [activeList, setActiveList] = useState()
+  const [error, setError] = useState()
 
   useEffect(() => {
-    fetchTodoLists().then(setTodoLists)
+    const fetchData = async () => {
+      try {
+        const data = await fetchTodoLists()
+        if (data.error) {
+          setError(data.message)
+        } else {
+          setTodoLists(data)
+        }
+      } catch (error) {
+        setError(error.message)
+      }
+    }
+    fetchData()
   }, [])
+
+  const updateTodo = (index, value) => {
+    const currentList = todoLists[activeList]
+    const updatedTodos = [...currentList.todos]
+    updatedTodos[index] = value
+    setTodoLists({
+      ...todoLists,
+      [activeList]: { ...currentList, todos: updatedTodos },
+    })
+  }
+
+  const saveTodoListHandler = async (id, todos) => {
+    try {
+      const updatedList = await saveTodoList(id, todos)
+      if (updatedList.error) {
+        setError(updatedList.message)
+      } else {
+        setTodoLists({
+          ...todoLists,
+          [id]: updatedList,
+        })
+      }
+    } catch (error) {
+      setError(error.message)
+    }
+  }
+
+  const addTodoHandler = async (todo) => {
+    try {
+      const updatedList = await addTodo(activeList, todo)
+      if (updatedList.error) {
+        setError(updatedList.message)
+      } else {
+        setTodoLists({
+          ...todoLists,
+          [activeList]: updatedList,
+        })
+      }
+    } catch (error) {
+      setError(error.message)
+    }
+  }
+
+  const deleteTodoHandler = async (index) => {
+    try {
+      const updatedList = await deleteTodo(activeList, index)
+      if (updatedList.error) {
+        setError(updatedList.message)
+      } else {
+        setTodoLists({
+          ...todoLists,
+          [activeList]: updatedList,
+        })
+      }
+    } catch (error) {
+      setError(error.message)
+    }
+  }
 
   if (!Object.keys(todoLists).length) return null
   return (
@@ -61,14 +115,18 @@ export const TodoLists = ({ style }) => {
         <TodoListForm
           key={activeList} // use key to make React recreate component to reset internal state
           todoList={todoLists[activeList]}
-          saveTodoList={(id, { todos }) => {
-            const listToUpdate = todoLists[id]
-            setTodoLists({
-              ...todoLists,
-              [id]: { ...listToUpdate, todos },
-            })
-          }}
+          updateTodo={updateTodo}
+          saveTodoList={saveTodoListHandler}
+          addTodo={addTodoHandler}
+          deleteTodo={deleteTodoHandler}
         />
+      )}
+      {error && (
+        <Snackbar open autoHideDuration={6000} onClose={() => setError(null)}>
+          <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        </Snackbar>
       )}
     </Fragment>
   )
