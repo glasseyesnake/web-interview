@@ -44,10 +44,10 @@ export const TodoLists = ({ style }) => {
       }, 500), [] // empty array ensures it is created only once
   )
 
-  const updateTodo = (index, value) => {
+  const updateTodoText = (index, value) => {
     const currentList = todoLists[activeList]
     const updatedTodos = [...currentList.todos]
-    updatedTodos[index] = value
+    updatedTodos[index] = { ...updatedTodos[index], text: value }
     setTodoLists({
       ...todoLists,
       [activeList]: { ...currentList, todos: updatedTodos },
@@ -55,8 +55,25 @@ export const TodoLists = ({ style }) => {
     debouncedSave(activeList, updatedTodos)
   }
 
-  const addTodoHandler = async (todo) => {
+  const toggleTodoCompletion = (index) => {
+    const currentList = todoLists[activeList]
+    const updatedTodos = [...currentList.todos]
+    updatedTodos[index] = {
+      ...updatedTodos[index],
+      completed: !updatedTodos[index].completed,
+    }
+    setTodoLists({
+      ...todoLists,
+      [activeList]: { ...currentList, todos: updatedTodos },
+    })
+    saveTodoList(activeList, updatedTodos).catch((error) => {
+      setError(error.message)
+    })
+  }
+
+  const addTodoHandler = async () => {
     try {
+      const todo = { text: "", completed: false }
       const updatedList = await addTodo(activeList, todo)
       if (updatedList.error) {
         setError(updatedList.message)
@@ -109,7 +126,8 @@ export const TodoLists = ({ style }) => {
         <TodoListForm
           key={activeList} // use key to make React recreate component to reset internal state
           todoList={todoLists[activeList]}
-          updateTodo={updateTodo}
+          updateTodoText={updateTodoText}
+          toggleTodoCompletion={toggleTodoCompletion}
           addTodo={addTodoHandler}
           deleteTodo={deleteTodoHandler}
         />
