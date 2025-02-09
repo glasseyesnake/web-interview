@@ -1,4 +1,5 @@
-import React, { Fragment, useState, useEffect } from 'react'
+import React, { Fragment, useState, useEffect, useMemo } from 'react'
+import { debounce } from 'lodash'
 import {
   Card,
   CardContent,
@@ -35,6 +36,14 @@ export const TodoLists = ({ style }) => {
     fetchData()
   }, [])
 
+  const debouncedSave = useMemo(() =>
+      debounce((id, todos) => {
+        saveTodoList(id, todos).catch((error) => {
+          setError(error.message)
+        })
+      }, 500), [] // empty array ensures it is created only once
+  )
+
   const updateTodo = (index, value) => {
     const currentList = todoLists[activeList]
     const updatedTodos = [...currentList.todos]
@@ -43,22 +52,7 @@ export const TodoLists = ({ style }) => {
       ...todoLists,
       [activeList]: { ...currentList, todos: updatedTodos },
     })
-  }
-
-  const saveTodoListHandler = async (id, todos) => {
-    try {
-      const updatedList = await saveTodoList(id, todos)
-      if (updatedList.error) {
-        setError(updatedList.message)
-      } else {
-        setTodoLists({
-          ...todoLists,
-          [id]: updatedList,
-        })
-      }
-    } catch (error) {
-      setError(error.message)
-    }
+    debouncedSave(activeList, updatedTodos)
   }
 
   const addTodoHandler = async (todo) => {
@@ -116,7 +110,6 @@ export const TodoLists = ({ style }) => {
           key={activeList} // use key to make React recreate component to reset internal state
           todoList={todoLists[activeList]}
           updateTodo={updateTodo}
-          saveTodoList={saveTodoListHandler}
           addTodo={addTodoHandler}
           deleteTodo={deleteTodoHandler}
         />
