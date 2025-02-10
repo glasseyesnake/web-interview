@@ -12,6 +12,7 @@ import {
   Alert,
 } from '@mui/material'
 import ReceiptIcon from '@mui/icons-material/Receipt'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { TodoListForm } from './TodoListForm'
 import { fetchTodoLists, addTodo, deleteTodo, saveTodoList } from '../../api/todos-server-calls'
 
@@ -136,7 +137,16 @@ export const TodoLists = ({ style }) => {
                   <ListItemIcon>
                     <ReceiptIcon color={isCompleted ? 'success' : 'inherit'} />
                   </ListItemIcon>
-                  <ListItemText primary={list.title} secondary={isCompleted ? 'Completed' : ''} />
+                  <ListItemText
+                    primary={
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span>{list.title}</span>
+                        {isCompleted && (
+                          <CheckCircleIcon sx={{ color: 'green', ml: 1 }} fontSize='small' />
+                        )}
+                      </div>
+                    }
+                  />
                 </ListItemButton>
               )
             })}
