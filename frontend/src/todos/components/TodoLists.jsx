@@ -16,8 +16,9 @@ import { TodoListForm } from './TodoListForm'
 import { fetchTodoLists, addTodo, deleteTodo, saveTodoList } from '../../api/todos-server-calls'
 
 export const TodoLists = ({ style }) => {
+  // Initialize activeList from localStorage (if available)
   const [todoLists, setTodoLists] = useState({})
-  const [activeList, setActiveList] = useState()
+  const [activeList, setActiveList] = useState(() => localStorage.getItem('activeList'))
   const [error, setError] = useState()
 
   useEffect(() => {
@@ -26,6 +27,12 @@ export const TodoLists = ({ style }) => {
     }
     fetchData()
   }, [])
+
+  useEffect(() => {
+    if (activeList) {
+      localStorage.setItem('activeList', activeList)
+    }
+  }, [activeList])
 
   const debouncedSave = useMemo(
     () =>
