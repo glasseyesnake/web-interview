@@ -27,12 +27,14 @@ export const TodoLists = ({ style }) => {
     fetchData()
   }, [])
 
-  const debouncedSave = useMemo(() =>
+  const debouncedSave = useMemo(
+    () =>
       debounce((id, todos) => {
         saveTodoList(id, todos).catch((error) => {
           setError(error.message)
         })
-      }, 500), [] // empty array ensures it is created only once
+      }, 500),
+    [] // empty array ensures it is created only once
   )
 
   const updateTodoText = (index, value) => {
@@ -146,7 +148,7 @@ export const TodoLists = ({ style }) => {
       )}
       {error && (
         <Snackbar open autoHideDuration={6000} onClose={() => setError(null)}>
-          <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
+          <Alert onClose={() => setError(null)} severity='error' sx={{ width: '100%' }}>
             {error}
           </Alert>
         </Snackbar>

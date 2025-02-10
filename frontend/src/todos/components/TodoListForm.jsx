@@ -1,9 +1,23 @@
 import React from 'react'
-import { TextField, Card, CardContent, CardActions, Button, Typography, Checkbox } from '@mui/material'
+import {
+  TextField,
+  Card,
+  CardContent,
+  CardActions,
+  Button,
+  Typography,
+  Checkbox,
+} from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 
-export const TodoListForm = ({ todoList, updateTodoText, toggleTodoCompletion, addTodo, deleteTodo }) => {
+export const TodoListForm = ({
+  todoList,
+  updateTodoText,
+  toggleTodoCompletion,
+  addTodo,
+  deleteTodo,
+}) => {
   return (
     <Card sx={{ margin: '0 1rem' }}>
       <CardContent>
