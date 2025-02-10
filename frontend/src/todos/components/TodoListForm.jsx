@@ -10,13 +10,13 @@ export const TodoListForm = ({ todoList, updateTodoText, toggleTodoCompletion, a
         <Typography component='h2'>{todoList.title}</Typography>
         <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
           {todoList.todos.map((todo, index) => (
-            <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
+            <div key={index} style={{ display: 'flex', alignItems: 'center', marginTop: '1rem' }}>
               <Checkbox checked={todo.completed} onChange={() => toggleTodoCompletion(index)} />
               <Typography sx={{ margin: '8px' }} variant='h6'>
                 {index + 1}
               </Typography>
               <TextField
-                sx={{ flexGrow: 1, marginTop: '1rem' }}
+                sx={{ flexGrow: 1 }}
                 label='What to do?'
                 value={todo.text}
                 onChange={(event) => updateTodoText(index, event.target.value)}
