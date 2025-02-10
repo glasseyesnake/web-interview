@@ -133,7 +133,19 @@ export const TodoLists = ({ style }) => {
               const isCompleted =
                 list.todos.length > 0 && list.todos.every((todo) => todo.completed)
               return (
-                <ListItemButton key={key} onClick={() => setActiveList(key)}>
+                <ListItemButton
+                  key={key}
+                  onClick={() => setActiveList(key)}
+                  sx={{
+                    mb: 1,
+                    borderRadius: 1,
+                    transition: 'background-color 0.3s',
+                    '&:hover': { backgroundColor: 'info.light' },
+                    backgroundColor: activeList === key ? '#efefef' : 'inherit',
+                    borderLeft: '4px solid',
+                    borderLeftColor: activeList === key ? 'primary.main' : 'transparent',
+                  }}
+                >
                   <ListItemIcon>
                     <ReceiptIcon color={isCompleted ? 'success' : 'inherit'} />
                   </ListItemIcon>
