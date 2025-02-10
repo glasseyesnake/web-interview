@@ -22,16 +22,7 @@ export const TodoLists = ({ style }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const data = await fetchTodoLists()
-        if (data.error) {
-          setError(data.message)
-        } else {
-          setTodoLists(data)
-        }
-      } catch (error) {
-        setError(error.message)
-      }
+      processApiResponse(fetchTodoLists(), (lists) => setTodoLists(lists))
     }
     fetchData()
   }, [])
@@ -45,59 +36,75 @@ export const TodoLists = ({ style }) => {
   )
 
   const updateTodoText = (index, value) => {
-    const currentList = todoLists[activeList]
-    const updatedTodos = [...currentList.todos]
-    updatedTodos[index] = { ...updatedTodos[index], text: value }
-    setTodoLists({
-      ...todoLists,
-      [activeList]: { ...currentList, todos: updatedTodos },
-    })
+    const updatedTodos = updateTodoAtIndex(index, (todo) => ({ ...todo, text: value }))
     debouncedSave(activeList, updatedTodos)
   }
 
   const toggleTodoCompletion = (index) => {
-    const currentList = todoLists[activeList]
-    const updatedTodos = [...currentList.todos]
-    updatedTodos[index] = {
-      ...updatedTodos[index],
-      completed: !updatedTodos[index].completed,
-    }
-    setTodoLists({
-      ...todoLists,
-      [activeList]: { ...currentList, todos: updatedTodos },
-    })
+    const updatedTodos = updateTodoAtIndex(index, (todo) => ({
+      ...todo,
+      completed: !todo.completed,
+    }))
     saveTodoList(activeList, updatedTodos).catch((error) => {
       setError(error.message)
     })
   }
 
   const addTodoHandler = async () => {
-    try {
-      const todo = { text: "", completed: false }
-      const updatedList = await addTodo(activeList, todo)
-      if (updatedList.error) {
-        setError(updatedList.message)
-      } else {
-        setTodoLists({
-          ...todoLists,
-          [activeList]: updatedList,
-        })
-      }
-    } catch (error) {
-      setError(error.message)
-    }
+    const newTodo = { text: '', completed: false }
+    handleUpdatedListApiResponse(addTodo(activeList, newTodo))
   }
 
   const deleteTodoHandler = async (index) => {
+    handleUpdatedListApiResponse(deleteTodo(activeList, index))
+  }
+
+  /**
+   * Update todo at index in the current active list
+   * @param {number} index - index of the todo to update
+   * @param {function} updaterFn - function to update the todo
+   * @returns {Array} - updated todos
+   */
+  const updateTodoAtIndex = (index, updaterFn) => {
+    const currentTodos = todoLists[activeList].todos
+    const updatedTodos = currentTodos.map((todo, idx) => (idx === index ? updaterFn(todo) : todo))
+    setTodoLists((prevLists) => {
+      const currentList = prevLists[activeList]
+      return {
+        ...prevLists,
+        [activeList]: { ...currentList, todos: updatedTodos },
+      }
+    })
+    return updatedTodos
+  }
+
+  /**
+   * Update the current active list with the updated list from the API response
+   * @param {Promise} apiCallPromise - promise returned from the API call
+   * @returns {Promise<void>}
+   */
+  const handleUpdatedListApiResponse = async (apiCallPromise) => {
+    processApiResponse(apiCallPromise, (updatedList) => {
+      setTodoLists((prevLists) => ({
+        ...prevLists,
+        [activeList]: updatedList,
+      }))
+    })
+  }
+
+  /**
+   * Process the API response and update the state accordingly
+   * @param {Promise} apiCallPromise - promise returned from the API call
+   * @param {function} updateStateFn - function to update the state
+   * @returns {Promise<void>}
+   */
+  const processApiResponse = async (apiCallPromise, updateStateFn) => {
     try {
-      const updatedList = await deleteTodo(activeList, index)
-      if (updatedList.error) {
-        setError(updatedList.message)
+      const result = await apiCallPromise
+      if (result.error) {
+        setError(result.message)
       } else {
-        setTodoLists({
-          ...todoLists,
-          [activeList]: updatedList,
-        })
+        updateStateFn(result)
       }
     } catch (error) {
       setError(error.message)
