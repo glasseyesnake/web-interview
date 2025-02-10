@@ -34,6 +34,9 @@ export const TodoListForm = ({
                 label='What to do?'
                 value={todo.text}
                 onChange={(event) => updateTodoText(index, event.target.value)}
+                InputProps={{
+                  style: { textDecoration: todo.completed ? 'line-through' : 'none' },
+                }}
               />
               <Button
                 sx={{ margin: '8px' }}
