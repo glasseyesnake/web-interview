@@ -1,8 +1,10 @@
 import React, { Fragment, useState, useEffect, useMemo } from 'react'
 import { debounce } from 'lodash'
 import {
+  Box,
   Card,
   CardContent,
+  CircularProgress,
   List,
   ListItemButton,
   ListItemText,
@@ -21,10 +23,14 @@ export const TodoLists = ({ style }) => {
   const [todoLists, setTodoLists] = useState({})
   const [activeList, setActiveList] = useState(() => localStorage.getItem('activeList'))
   const [error, setError] = useState()
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
-      processApiResponse(fetchTodoLists(), (lists) => setTodoLists(lists))
+      processApiResponse(fetchTodoLists(), (lists) => {
+        setTodoLists(lists)
+        setLoading(false)
+      })
     }
     fetchData()
   }, [])
@@ -115,6 +121,14 @@ export const TodoLists = ({ style }) => {
     } catch (error) {
       setError(error.message)
     }
+  }
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+        <CircularProgress />
+      </Box>
+    )
   }
 
   if (!Object.keys(todoLists).length) return null
