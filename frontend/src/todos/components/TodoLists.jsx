@@ -38,9 +38,7 @@ export const TodoLists = ({ style }) => {
   const debouncedSave = useMemo(
     () =>
       debounce((id, todos) => {
-        saveTodoList(id, todos).catch((error) => {
-          setError(error.message)
-        })
+        processApiResponse(saveTodoList(id, todos))
       }, 500),
     [] // empty array ensures it is created only once
   )
@@ -55,9 +53,7 @@ export const TodoLists = ({ style }) => {
       ...todo,
       completed: !todo.completed,
     }))
-    saveTodoList(activeList, updatedTodos).catch((error) => {
-      setError(error.message)
-    })
+    processApiResponse(saveTodoList(activeList, updatedTodos))
   }
 
   const addTodoHandler = async () => {
@@ -105,10 +101,10 @@ export const TodoLists = ({ style }) => {
   /**
    * Process the API response and update the state accordingly
    * @param {Promise} apiCallPromise - promise returned from the API call
-   * @param {function} updateStateFn - function to update the state
+   * @param {function} updateStateFn - function to update the state, if needed
    * @returns {Promise<void>}
    */
-  const processApiResponse = async (apiCallPromise, updateStateFn) => {
+  const processApiResponse = async (apiCallPromise, updateStateFn = () => {}) => {
     try {
       const result = await apiCallPromise
       if (result.error) {
