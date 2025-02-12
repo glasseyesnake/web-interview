@@ -136,7 +136,7 @@ export const TodoLists = ({ style }) => {
                     mb: 1,
                     borderRadius: 1,
                     transition: 'background-color 0.3s',
-                    '&:hover': { backgroundColor: 'info.light' },
+                    '&:hover': { backgroundColor: '#e0f7fa' },
                     backgroundColor: activeList === key ? '#efefef' : 'inherit',
                     borderLeft: '4px solid',
                     borderLeftColor: activeList === key ? 'primary.main' : 'transparent',
